@@ -4,7 +4,7 @@ FROM python:3.9.13
 ARG BOOST_URL=https://sourceforge.net/projects/boost/files/boost/1.74.0/boost_1_74_0.tar.bz2/download
 
 COPY . .
-WORKDIR /pyspnn
+WORKDIR /spnn
 ENV PYTHON_PATH=/root
 
 RUN apt-get update -qq && \

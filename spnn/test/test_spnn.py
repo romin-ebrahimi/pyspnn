@@ -1,7 +1,7 @@
 import boost_cpp
 from sklearn import datasets
 from sklearn.pipeline import Pipeline
-from spnn import SPNN
+from spnn.spnn import SPNN
 import unittest
 
 
@@ -37,6 +37,7 @@ class TestSPNN(unittest.TestCase):
         )
         preds = model_pipe.predict_proba(X=Xte)
 
+        print(preds)
         print(Yte)  # TODO: use a scoring method
 
         self.assertTrue(len(preds) > 0)  # TODO:

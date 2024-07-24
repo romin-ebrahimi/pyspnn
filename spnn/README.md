@@ -15,11 +15,16 @@ generalization with only a small set of known observations. Additionally, the
 Python methods utilize C++ on the backend to allow for faster processing of
 large data sets.
 
+The `spnn` directory can be copied into any project and built by adding the 
+library to the projects `requirements.txt` file using `../spnn`. See the example
+Dockerfile to understand how to build a containerized project with the library.
+
 - `Dockerfile` runs the unit tests and builds the Python library.
 - `boost.cpp` contains C++ methods for testing the Boost Python library.
 - `spnn.cpp` contains the backend C++ methods.
 - `spnn.py` contains the Python spnn class, which can be used with scikit-learn
 Pipelines.
+- `test` directory contains all spnn unit tests.
 
 ### Setup Git Hooks
 The files `.flake8`, `pyproject.toml`, and `.pre-commit-config.yaml` are used, 
