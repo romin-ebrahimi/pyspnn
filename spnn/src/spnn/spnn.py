@@ -48,7 +48,7 @@ class SPNN:
             self._n_classes = len(self._classes)
 
         if smoothing_matrix is None:
-            self.smoothing_matrix = np.cov(self.X_)
+            self.smoothing_matrix = np.cov(self.X_, rowvar=False)
         else:
             self.smoothing_matrix = smoothing_matrix
 

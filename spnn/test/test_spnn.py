@@ -1,6 +1,7 @@
 import boost_cpp
 from sklearn import datasets
 from sklearn.metrics import average_precision_score
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from spnn.spnn import SPNN
 import unittest
@@ -27,10 +28,13 @@ class TestSPNN(unittest.TestCase):
         """
         Test SPNN model class within a scikit-learn Pipeline.
         """
-        Xtr = self.data.data[:100,]
-        Xte = self.data.data[100:,]
-        Ytr = self.data.target[:100,]
-        Yte = self.data.target[100:,]
+        Xtr, Xte, Ytr, Yte = train_test_split(
+            self.data.data,
+            self.data.target,
+            test_size=0.2,
+            shuffle=True,
+        )
+
         model_pipe = Pipeline([("spnn", SPNN())])
         model_pipe.fit(
             X=Xtr,
