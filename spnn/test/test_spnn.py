@@ -1,5 +1,6 @@
 import boost_cpp
 from sklearn import datasets
+from sklearn.metrics import average_precision_score
 from sklearn.pipeline import Pipeline
 from spnn.spnn import SPNN
 import unittest
@@ -35,10 +36,13 @@ class TestSPNN(unittest.TestCase):
             X=Xtr,
             y=Ytr,
         )
+
         preds = model_pipe.predict_proba(X=Xte)
 
         print(preds)
         print(Yte)  # TODO: use a scoring method
+        precision = average_precision_score(y_true=Yte, y_score=preds)
+        print(precision)
 
         self.assertTrue(len(preds) > 0)  # TODO:
 
