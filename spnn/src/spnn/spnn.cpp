@@ -13,10 +13,10 @@ list spnn_predict(
     list Xte,
     list smoothing_matrix
 ) {
-    int size_tr = len(Xtr);
-    int size_te = len(Xte);
-    int n_features = len(Xtr[0]);
-    int mat_dim = len(smoothing_matrix[0]);
+    unsigned int size_tr = len(Xtr);
+    unsigned int size_te = len(Xte);
+    unsigned int n_features = len(Xtr[0]);
+    unsigned int mat_dim = len(smoothing_matrix[0]);
 
     arma::mat X_tr(size_tr, n_features);
     arma::mat Y_tr(size_tr, 1);
@@ -25,8 +25,8 @@ list spnn_predict(
     // Convert from boost::python::list to arma::mat for matrix processing.
     // Iterate through list values and allocate to their respective arma::mat.
     arma::mat cov_matrix(mat_dim, mat_dim);
-    for (int i = 0; i < mat_dim; i++) {
-        for (int j = 0; j < mat_dim; j++){
+    for (unsigned int i = 0; i < mat_dim; i++) {
+        for (unsigned int j = 0; j < mat_dim; j++){
             cov_matrix(i, j) = extract<double>(smoothing_matrix[i][j]);
         }
     }
@@ -55,9 +55,8 @@ list spnn_predict(
 
     // Get the class counts for each class k and store in N_k.
     for (unsigned int k = 0; k < classes.n_rows; k++) {
-        N_k(0, k) = static_cast<double>(
-            arma::size(arma::find(X_tr == classes(k, 0)))[0]
-        );
+        arma::uvec indices = arma::find(Y_tr == classes(k, 0));
+        N_k(0, k) = static_cast<double>(indices.size());
     }
 
     list probabilities;
@@ -75,22 +74,20 @@ list spnn_predict(
         for (unsigned int j = 0; j < size_tr; j++) {
             // What class is in Y_tr[j] relative to k index in classes matrix?
             arma::uvec k_find = arma::find(classes == Y_tr(j, 0));
-            int k_index = static_cast<int>(k_find.at(0));
 
             Xd = X_te.row(i) - X_tr.row(j);
             f = std::exp(
-                -0.5 * arma::as_scalar(arma::abs(Xd * inv_cov_matrix * Xd.t()))
+                -0.5 * arma::as_scalar(Xd * inv_cov_matrix * Xd.t())
             );
+            if (std::isnan(f)) { f = 0.0; }
 
-            //if (!std::isfinite(fi)) { fi = 0.0; }
-
-            // Add to the density estimate f_k by scaling with N_k.
-            fk(0, k_index) += f;
+            // Add to the density estimate f_k.
+            fk(0, k_find[0]) += f;
         }
+
+        // Scale all f_k by dividing by class counts N_k.
+        fk /= N_k;
         // Use f_k to estimate probabilities and then add values to Python list.
-        for (unsigned int k = 0; k < fk.n_cols; k++) {
-            fk(0, k) = fk(0, k) / N_k(0, k);
-        }
         for (unsigned int k = 0; k < fk.n_cols; k++) {
             probabilities[i][k] = fk(0, k) / arma::accu(fk);
         }

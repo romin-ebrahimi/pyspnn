@@ -11,11 +11,12 @@ class SPNN:
         self.X_ = None
         self.y_ = None
         # Smoothing matrix is the covariance matrix in most cases.
-        self.smoothing_matrix = None
+        self.smoothing_matrix_ = None
         self._classes = None
         self._n_classes = None
         # If identity=True, then SPNN becomes original PNN.
         self._identity = identity
+        self._is_fitted = False
 
     def fit(
         self,
@@ -48,13 +49,15 @@ class SPNN:
             self._n_classes = len(self._classes)
 
         if smoothing_matrix is None:
-            self.smoothing_matrix = np.cov(self.X_, rowvar=False)
+            self.smoothing_matrix_ = np.cov(self.X_, rowvar=False)
         else:
-            self.smoothing_matrix = smoothing_matrix
+            self.smoothing_matrix_ = smoothing_matrix
 
         if self._identity:
-            identity_matrix = np.identity(self.smoothing_matrix.shape[0])
-            self.smoothing_matrix = self.smoothing_matrix * identity_matrix
+            identity_matrix = np.identity(self.smoothing_matrix_.shape[0])
+            self.smoothing_matrix_ = self.smoothing_matrix_ * identity_matrix
+
+        self._is_fitted = True
 
         return self
 
@@ -72,16 +75,15 @@ class SPNN:
             Returns the probability of the sample for each class in the model.
         """
         assert X.shape[1] == self.X_.shape[1], "Features missing from X."
-
-        check_is_fitted(self)
         X = check_array(X)
+        check_is_fitted(self)
 
         # Use the C++ method on the backend for faster processing.
         probabilities = spnn_cpp.spnn_predict(
             self.X_.tolist(),
             self.y_.tolist(),
             X.tolist(),
-            self.smoothing_matrix.tolist(),
+            self.smoothing_matrix_.tolist(),
         )
 
         return np.array(probabilities)
