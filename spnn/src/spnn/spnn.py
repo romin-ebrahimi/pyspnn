@@ -10,7 +10,6 @@ class SPNN:
     ):
         self.X_ = None
         self.y_ = None
-        # Smoothing matrix is the covariance matrix in most cases.
         self.smoothing_matrix_ = None
         self._classes = None
         self._n_classes = None
@@ -35,6 +34,7 @@ class SPNN:
         Args:
             X : array-like input data of shape (n_samples, n_features)
             y : array-like input target values of shape (n_samples,)
+            smoothing_matrix: typically the covariance matrix (optional)
         """
         assert y.ndim == 1, "Target y should be of shape (n_samples,)"
         assert X.shape[0] == y.shape[0], "X and y should have same row count."
@@ -55,7 +55,10 @@ class SPNN:
 
         if self._identity:
             identity_matrix = np.identity(self.smoothing_matrix_.shape[0])
-            self.smoothing_matrix_ = self.smoothing_matrix_ * identity_matrix
+            self.smoothing_matrix_ = np.multiply(
+                self.smoothing_matrix_,
+                identity_matrix,
+            )
 
         self._is_fitted = True
 

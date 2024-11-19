@@ -35,14 +35,13 @@ class TestSPNN(unittest.TestCase):
             shuffle=True,
         )
 
-        model_pipe = Pipeline([("spnn", SPNN())])
+        model_pipe = Pipeline([("spnn", SPNN(identity=True))])
         model_pipe.fit(
             X=Xtr,
             y=Ytr,
         )
 
         preds = model_pipe.predict_proba(X=Xte)
-
         print(preds)
         print(Yte)  # TODO: use a scoring method
         precision = average_precision_score(y_true=Yte, y_score=preds)
